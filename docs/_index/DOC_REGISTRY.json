@@ -1,0 +1,12 @@
+﻿{
+  "version": 1,
+  "documents": [
+    { "id": "master-index", "title": "MASTER INDEX", "area": "_index", "status": "active" },
+    { "id": "taxonomy", "title": "TAXONOMY", "area": "_taxonomy", "status": "active" },
+    { "id": "system-map", "title": "SYSTEM MAP", "area": "_architecture", "status": "active" },
+    { "id": "role-map", "title": "ROLE MAP", "area": "_architecture", "status": "active" },
+    { "id": "data-entities", "title": "DATA ENTITIES", "area": "_architecture", "status": "active" },
+    { "id": "funnel-map", "title": "FUNNEL MAP", "area": "_architecture", "status": "active" },
+    { "id": "store-routing-model", "title": "STORE ROUTING MODEL", "area": "_architecture", "status": "active" }
+  ]
+}

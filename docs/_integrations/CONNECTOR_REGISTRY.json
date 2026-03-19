@@ -1,0 +1,20 @@
+﻿{
+  "version": 1,
+  "connectors": [
+    { "name": "Shopify", "state": "configured" },
+    { "name": "Stripe", "state": "configured" },
+    { "name": "Twilio", "state": "configured" },
+    { "name": "Firecrawl", "state": "configured" },
+    { "name": "ElevenLabs", "state": "configured" },
+    { "name": "Contentful", "state": "configured" },
+    { "name": "Supabase", "state": "configured" },
+    { "name": "GitHub", "state": "configured" },
+    { "name": "Railway", "state": "configured" },
+    { "name": "Groq", "state": "planned" },
+    { "name": "Ollama-Compatible", "state": "planned" },
+    { "name": "GPT Actions", "state": "planned" },
+    { "name": "xps-ai-factory", "state": "planned" },
+    { "name": "open-lovable", "state": "planned" },
+    { "name": "xps-orchestrator", "state": "planned" }
+  ]
+}

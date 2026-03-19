@@ -1,0 +1,21 @@
+﻿# ENVIRONMENT MATRIX
+
+## Local
+- .env
+- Docker Postgres
+- Docker Redis
+
+## GitHub Secrets
+- RAILWAY_TOKEN
+- SUPABASE_SERVICE_ROLE_KEY
+- SHOPIFY_ADMIN_ACCESS_TOKEN
+- STRIPE_SECRET_KEY
+- TWILIO_AUTH_TOKEN
+- FIRECRAWL_API_KEY
+- ELEVENLABS_API_KEY
+- CONTENTFUL_CMA_TOKEN
+- GROQ_API_KEY
+- OPENAI_API_KEY
+
+## Railway
+- Mirror runtime variables from .env.example

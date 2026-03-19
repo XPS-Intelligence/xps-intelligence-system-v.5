@@ -1,0 +1,11 @@
+﻿{
+  "version": 1,
+  "components": [
+    { "name": "web", "type": "app", "path": "apps/web" },
+    { "name": "api", "type": "app", "path": "apps/api" },
+    { "name": "worker", "type": "app", "path": "apps/worker" },
+    { "name": "ui", "type": "package", "path": "packages/ui" },
+    { "name": "config", "type": "package", "path": "packages/config" },
+    { "name": "types", "type": "package", "path": "packages/types" }
+  ]
+}

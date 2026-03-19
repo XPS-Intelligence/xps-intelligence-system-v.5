@@ -1,0 +1,12 @@
+﻿{
+  "name": "worker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('apps/worker scaffold ready'); process.exit(0)\"",
+    "build": "node -e \"console.log('apps/worker build placeholder'); process.exit(0)\"",
+    "lint": "node -e \"console.log('apps/worker lint placeholder'); process.exit(0)\"",
+    "typecheck": "node -e \"console.log('apps/worker typecheck placeholder'); process.exit(0)\"",
+    "test": "node -e \"console.log('apps/worker test placeholder'); process.exit(0)\""
+  }
+}

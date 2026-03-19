@@ -1,0 +1,7 @@
+﻿{
+  "version": 1,
+  "prompts": [
+    { "name": "copilot-instructions", "path": "docs/_prompts/COPILOT_INSTRUCTIONS.md" },
+    { "name": "gpt-actions-spec", "path": "docs/_prompts/GPT_ACTIONS_SPEC.md" }
+  ]
+}

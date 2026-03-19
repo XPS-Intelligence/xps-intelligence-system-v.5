@@ -1,0 +1,12 @@
+﻿{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('apps/web scaffold ready'); process.exit(0)\"",
+    "build": "node -e \"console.log('apps/web build placeholder'); process.exit(0)\"",
+    "lint": "node -e \"console.log('apps/web lint placeholder'); process.exit(0)\"",
+    "typecheck": "node -e \"console.log('apps/web typecheck placeholder'); process.exit(0)\"",
+    "test": "node -e \"console.log('apps/web test placeholder'); process.exit(0)\""
+  }
+}
