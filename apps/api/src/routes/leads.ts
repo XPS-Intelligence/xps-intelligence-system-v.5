@@ -121,6 +121,19 @@ leadsRouter.patch("/:id", async (req, res) => {
 });
 
 // POST /leads/bulk — import multiple leads at once (from Sales Staff scraper)
+
+/** Build a normalized location string from a scraped lead record. */
+function buildLocation(lead: Record<string, unknown>): string | null {
+  const city = String(lead.city || "").trim();
+  const state = String(lead.state || "").trim();
+  const address = String(lead.address || "").trim();
+  if (city || state) {
+    const combined = [city, state].filter(Boolean).join(", ");
+    return combined || address || null;
+  }
+  return address || null;
+}
+
 leadsRouter.post("/bulk", requireRole("sales_staff", "manager", "owner", "admin"), async (req, res) => {
   const { leads } = req.body as { leads: Array<Record<string, unknown>> };
   if (!Array.isArray(leads) || leads.length === 0) {
@@ -145,7 +158,7 @@ leadsRouter.post("/bulk", requireRole("sales_staff", "manager", "owner", "admin"
           lead.phone || null,
           lead.website || null,
           lead.industry || lead.vertical || null,
-          lead.address ? `${lead.city || ""}, ${lead.state || ""}`.trim().replace(/^,\s*/, "") || String(lead.address) : null,
+          buildLocation(lead),
           "Prospecting",
           lead.notes || null,
           user.id,

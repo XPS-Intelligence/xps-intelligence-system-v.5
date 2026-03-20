@@ -127,7 +127,12 @@ scrapeRouter.post("/search", requireRole("sales_staff", "manager", "owner", "adm
       return res.json({ results: dbRows, source: "database", count: dbRows.length });
     }
 
-    // Seed fallback (development/CI only — swap for live scraping in production)
+    // In production, DB must return results — never silently fall back to seed data
+    if (process.env.NODE_ENV === "production") {
+      return res.json({ results: [], source: "database", count: 0 });
+    }
+
+    // Seed fallback — development/CI/test only
     const cityKey = Object.keys(seedData).find((k) =>
       k.toLowerCase().includes(city.toLowerCase())
     );

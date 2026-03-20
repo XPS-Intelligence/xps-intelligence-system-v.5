@@ -70,6 +70,9 @@ const KEYWORD_SUGGESTIONS = [
 
 const SPECIALTY_OPTIONS = ["Commercial", "Residential", "Industrial", "All"];
 
+/** Delay before hiding autocomplete dropdown on input blur (ms) */
+const AUTOCOMPLETE_BLUR_DELAY = 150;
+
 const QUICK_CATEGORIES = [
   { label: "Epoxy Contractors", industry: "Epoxy Flooring", keyword: "epoxy floor contractor" },
   { label: "Concrete Polishing", industry: "Polished Concrete", keyword: "concrete polishing" },
@@ -159,7 +162,8 @@ const SalesStaff = () => {
   // Launch single search
   const handleSingleSearch = useCallback(async () => {
     const { city, state } = parseCityState(cityInput);
-    const id = `job-${++jobIdRef.current}`;
+    jobIdRef.current += 1;
+    const id = `job-${jobIdRef.current}`;
     const job: SearchJob = {
       id,
       label: `${city}, ${state} — ${industry}`,
@@ -182,16 +186,19 @@ const SalesStaff = () => {
     const { city, state } = parseCityState(cityInput);
     setIsRunning(true);
 
-    const newJobs: SearchJob[] = QUICK_CATEGORIES.map((cat) => ({
-      id: `job-${++jobIdRef.current}`,
-      label: `${city}, ${state} — ${cat.label}`,
-      city,
-      state,
-      industry: cat.industry,
-      keyword: cat.keyword,
-      status: "pending" as const,
-      results: [],
-    }));
+    const newJobs: SearchJob[] = QUICK_CATEGORIES.map((cat) => {
+      jobIdRef.current += 1;
+      return {
+        id: `job-${jobIdRef.current}`,
+        label: `${city}, ${state} — ${cat.label}`,
+        city,
+        state,
+        industry: cat.industry,
+        keyword: cat.keyword,
+        status: "pending" as const,
+        results: [],
+      };
+    });
 
     setJobs((prev) => [...newJobs, ...prev]);
     if (newJobs.length > 0) setExpandedJob(newJobs[0].id);
@@ -294,7 +301,7 @@ const SalesStaff = () => {
                   value={cityInput}
                   onChange={(e) => setCityInput(e.target.value)}
                   onFocus={() => setCityFocus(true)}
-                  onBlur={() => setTimeout(() => setCityFocus(false), 150)}
+                  onBlur={() => setTimeout(() => setCityFocus(false), AUTOCOMPLETE_BLUR_DELAY)}
                   list="city-suggestions"
                   className="pl-8 bg-card border-border text-sm"
                   aria-label="City"
@@ -345,7 +352,7 @@ const SalesStaff = () => {
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
                   onFocus={() => setKeywordFocus(true)}
-                  onBlur={() => setTimeout(() => setKeywordFocus(false), 150)}
+                  onBlur={() => setTimeout(() => setKeywordFocus(false), AUTOCOMPLETE_BLUR_DELAY)}
                   className="pl-8 bg-card border-border text-sm"
                   aria-label="Keyword"
                 />
