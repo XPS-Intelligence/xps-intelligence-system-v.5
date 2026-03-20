@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { leadsRouter } from "./routes/leads.js";
 import { scrapeRouter } from "./routes/scrape.js";
 import { agentsRouter } from "./routes/agents.js";
@@ -17,9 +18,29 @@ app.use(helmet());
 app.use(cors({ origin: process.env.APP_URL || "*" }));
 app.use(express.json({ limit: "10mb" }));
 
+// Global rate limiter: 200 req/min per IP
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+});
+
+// Stricter limiter for auth endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts, please try again later." },
+});
+
+app.use(globalLimiter);
+
 // Routes
 app.use("/api/health", healthRouter);
-app.use("/api/auth", authRouter);
+app.use("/api/auth", authLimiter, authRouter);
 app.use("/api/leads", leadsRouter);
 app.use("/api/scrape", scrapeRouter);
 app.use("/api/agents", agentsRouter);
