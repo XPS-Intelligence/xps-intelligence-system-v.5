@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { Shield, Users, Building2, Database, Activity, Settings, Lock, Server, GitBranch, Cpu, Plus, Play, Workflow } from "lucide-react";
+import { Shield, Users, Building2, Database, Activity, Lock, Server, GitBranch, Cpu, Plus, Play, Workflow, CheckCircle2, AlertCircle, Clock, XCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { SystemHealthPanel } from "@/components/SystemHealthPanel";
 
 const systemCards = [
   { title: "Users & Roles", desc: "Manage 247 users across 4 role types", icon: Users, stat: "247 active" },
@@ -17,7 +18,7 @@ const systemCards = [
   { title: "Activity Log", desc: "System-wide audit and event logging", icon: Activity, stat: "12.4K events" },
 ];
 
-type Tab = "overview" | "workflows" | "audit";
+type Tab = "overview" | "workflows" | "audit" | "connectors";
 
 interface Workflow {
   id: string;
@@ -27,6 +28,14 @@ interface Workflow {
   is_active: boolean;
   run_count: number;
   created_at: string;
+}
+
+interface Connector {
+  name: string;
+  status: "connected" | "configured" | "pending" | "error";
+  category: string;
+  lastChecked: string;
+  details?: string;
 }
 
 interface AuditLog {
@@ -41,6 +50,8 @@ const AdminPage = () => {
   const [tab, setTab] = useState<Tab>("overview");
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [connectors, setConnectors] = useState<Connector[]>([]);
+  const [testingConnector, setTestingConnector] = useState<string | null>(null);
   const [newWfName, setNewWfName] = useState("");
   const [newWfTrigger, setNewWfTrigger] = useState<"manual" | "schedule" | "webhook" | "lead_created" | "lead_updated">("manual");
   const { toast } = useToast();
@@ -54,6 +65,11 @@ const AdminPage = () => {
     if (tab === "audit") {
       api.get<{ logs: AuditLog[] }>("/audit")
         .then((d) => setAuditLogs(d.logs))
+        .catch(() => {});
+    }
+    if (tab === "connectors") {
+      api.get<{ connectors: Connector[] }>("/connectors")
+        .then((d) => setConnectors(d.connectors))
         .catch(() => {});
     }
   }, [tab]);
@@ -84,6 +100,26 @@ const AdminPage = () => {
     }
   };
 
+  const handleTestConnector = async (name: string) => {
+    setTestingConnector(name);
+    try {
+      const result = await api.post<{ success: boolean; message: string; latency?: number }>(`/connectors/${name}/test`, {});
+      toast({
+        title: result.success ? `${name} connected` : `${name} test failed`,
+        description: result.message + (result.latency ? ` (${result.latency}ms)` : ""),
+        variant: result.success ? "default" : "destructive",
+      });
+      // Refresh connector list
+      api.get<{ connectors: Connector[] }>("/connectors")
+        .then((d) => setConnectors(d.connectors))
+        .catch(() => {});
+    } catch (err) {
+      toast({ title: "Test failed", description: (err as Error).message, variant: "destructive" });
+    } finally {
+      setTestingConnector(null);
+    }
+  };
+
   return (
   <AppLayout title="Admin">
     <div className="space-y-6">
@@ -94,7 +130,7 @@ const AdminPage = () => {
 
       {/* Tabs */}
       <div className="flex gap-1 bg-card border border-border rounded-lg p-1 w-fit">
-        {(["overview", "workflows", "audit"] as Tab[]).map((t) => (
+        {(["overview", "workflows", "audit", "connectors"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -121,6 +157,7 @@ const AdminPage = () => {
               </div>
             ))}
           </div>
+          <SystemHealthPanel />
         </>
       )}
 
@@ -189,6 +226,61 @@ const AdminPage = () => {
                 <span className="text-xs text-muted-foreground shrink-0 ml-4">{new Date(entry.created_at).toLocaleString()}</span>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "connectors" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Live status of all external integrations and services.</p>
+            <Button variant="outline" size="sm" onClick={() => api.get<{ connectors: Connector[] }>("/connectors").then((d) => setConnectors(d.connectors)).catch(() => {})}>
+              <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Refresh
+            </Button>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            {connectors.map((c) => {
+              const statusConfig = {
+                connected: { icon: CheckCircle2, cls: "text-green-400", badge: "bg-green-500/10 text-green-400 border-green-500/30" },
+                configured: { icon: CheckCircle2, cls: "text-yellow-400", badge: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" },
+                pending: { icon: Clock, cls: "text-muted-foreground", badge: "bg-muted text-muted-foreground border-border" },
+                error: { icon: XCircle, cls: "text-destructive", badge: "bg-destructive/10 text-destructive border-destructive/30" },
+              }[c.status] ?? { icon: AlertCircle, cls: "text-muted-foreground", badge: "bg-muted text-muted-foreground border-border" };
+              const StatusIcon = statusConfig.icon;
+              return (
+                <div key={c.name} className="bg-gradient-card border border-border rounded-xl p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <StatusIcon className={`h-5 w-5 shrink-0 ${statusConfig.cls}`} />
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-foreground capitalize">{c.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">{c.category}</div>
+                      {c.details && <div className="text-[10px] text-muted-foreground/70 truncate">{c.details}</div>}
+                      <div className="text-[10px] text-muted-foreground/50 mt-0.5">
+                        Checked: {new Date(c.lastChecked).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${statusConfig.badge}`}>
+                      {c.status}
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={testingConnector === c.name}
+                      onClick={() => handleTestConnector(c.name)}
+                    >
+                      {testingConnector === c.name ? <RefreshCw className="h-3 w-3 animate-spin" /> : "Test"}
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            {connectors.length === 0 && (
+              <div className="col-span-2 text-sm text-muted-foreground py-8 text-center">
+                Loading connectors...
+              </div>
+            )}
           </div>
         </div>
       )}

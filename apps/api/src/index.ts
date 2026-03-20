@@ -10,6 +10,7 @@ import { aiRouter } from "./routes/ai.js";
 import { authRouter } from "./routes/auth.js";
 import { auditRouter } from "./routes/audit.js";
 import { healthRouter } from "./routes/health.js";
+import { connectorsRouter } from "./routes/connectors.js";
 
 const app = express();
 const PORT = process.env.API_PORT || 4000;
@@ -46,6 +47,7 @@ app.use("/api/scrape", scrapeRouter);
 app.use("/api/agents", agentsRouter);
 app.use("/api/ai", aiRouter);
 app.use("/api/audit", auditRouter);
+app.use("/api/connectors", connectorsRouter);
 
 // Global error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
