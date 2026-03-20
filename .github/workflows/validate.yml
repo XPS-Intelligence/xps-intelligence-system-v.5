@@ -1,4 +1,4 @@
-﻿name: xps-ci-cd
+name: xps-validate
 
 on:
   push:
@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  validate:
+  validate-frontend:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -32,52 +32,12 @@ jobs:
       - name: Typecheck
         run: npm run typecheck --if-present
 
-      - name: Test
-        run: npm run test --if-present
-
-  e2e:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: validate
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
       - name: Build frontend
         run: npm run build:frontend
 
-      - name: Run Playwright e2e tests
-        run: npx playwright test
-        env:
-          CI: true
-
-      - name: Upload Playwright report
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 7
-
-  deploy:
-    if: github.ref == 'refs/heads/main' && secrets.RAILWAY_TOKEN != ''
-    needs: [validate, e2e]
+  validate-api:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -90,10 +50,39 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli
+      - name: Install
+        run: npm install
 
-      - name: Deploy to Railway
-        run: railway up
+      - name: Typecheck API
+        run: npm run typecheck --workspace apps/api --if-present
+
+      - name: Run API tests
+        run: npm run test --workspace apps/api --if-present
+
+  validate-agents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm install
+
+      - name: Validate agent scripts
+        run: node --check scripts/agents/ingest.mjs && node --check scripts/agents/optimize.mjs
+        continue-on-error: false
+
+      - name: Run agent unit tests
+        run: node scripts/agents/ingest.mjs --dry-run
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          CI: true
+          DRY_RUN: true

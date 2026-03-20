@@ -29,6 +29,63 @@ ownerRouter.get("/analytics", async (_req, res) => {
   }
 });
 
+/** POST /api/owner/simulation/run
+ *  Runs the prediction simulation engine with custom parameters.
+ */
+ownerRouter.post("/simulation/run", async (req, res) => {
+  const {
+    lead_pool      = 100,
+    followup_days  = 4,
+    touchpoints    = 4,
+    discount_pct   = 0,
+    avg_deal_value = 4500,
+    cost_per_lead  = 12,
+  } = req.body as {
+    lead_pool?: number;
+    followup_days?: number;
+    touchpoints?: number;
+    discount_pct?: number;
+    avg_deal_value?: number;
+    cost_per_lead?: number;
+  };
+
+  // Conversion rate model
+  let convRate = 0.12;
+  convRate += (touchpoints - 3) * 0.015;
+  convRate -= (followup_days - 4) * 0.008;
+  convRate += discount_pct > 0 ? 0.03 : 0;
+  convRate = Math.max(0.02, Math.min(0.45, convRate));
+
+  const closedDeals    = Math.round(lead_pool * convRate);
+  const revenue        = closedDeals * avg_deal_value * (1 - discount_pct / 100);
+  const totalCost      = lead_pool * cost_per_lead;
+  const profit         = revenue - totalCost;
+  const roi            = totalCost > 0 ? Math.round((profit / totalCost) * 100) : 0;
+
+  // ROI projections for 3 / 6 / 12 months
+  const roiProjections = [3, 6, 12].map((months) => ({
+    months,
+    revenue:      Math.round(revenue * months),
+    profit:       Math.round(profit * months),
+    roi_pct:      roi,
+    closed_deals: closedDeals * months,
+  }));
+
+  res.json({
+    inputs: { lead_pool, followup_days, touchpoints, discount_pct, avg_deal_value, cost_per_lead },
+    conversion_rate: Math.round(convRate * 1000) / 10,
+    per_month: {
+      closed_deals: closedDeals,
+      revenue:      Math.round(revenue),
+      profit:       Math.round(profit),
+      roi_pct:      roi,
+    },
+    projections: roiProjections,
+    efficiency_score: Math.min(10, Math.max(0, Math.round((roi / 30) * 10) / 10)),
+    generated_at: new Date().toISOString(),
+  });
+});
+
 ownerRouter.post("/simulation/save", async (req, res) => {
   try {
     const db = getDb();
