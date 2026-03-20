@@ -24,13 +24,30 @@ async function processTask(taskData: string): Promise<void> {
     // If lead context provided, enrich/create lead
     if (result.company && result.leads) {
       for (const lead of result.leads) {
-        await db.query(
-          `INSERT INTO leads (company_name, contact_name, email, phone, website, vertical, location, stage, source, score, created_by)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,'Prospecting','scraper',$8,$9)
-           ON CONFLICT (email) WHERE email IS NOT NULL DO UPDATE SET score=EXCLUDED.score, updated_at=NOW()`,
-          [lead.company_name, lead.contact_name, lead.email, lead.phone, lead.website,
-           lead.vertical, lead.location, lead.score, task.userId]
-        );
+        if (lead.email) {
+          // Dedup by email if available
+          await db.query(
+            `INSERT INTO leads (company_name, contact_name, email, phone, website, vertical, location, stage, source, score, created_by)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,'Prospecting','scraper',$8,$9)
+             ON CONFLICT (email) WHERE email IS NOT NULL DO UPDATE SET score=EXCLUDED.score, updated_at=NOW()`,
+            [lead.company_name, lead.contact_name, lead.email, lead.phone, lead.website,
+             lead.vertical, lead.location, lead.score, task.userId]
+          );
+        } else {
+          // No email: check if company+website already exists
+          const existing = await db.query(
+            "SELECT id FROM leads WHERE company_name = $1 AND (website = $2 OR $2 IS NULL) AND deleted_at IS NULL LIMIT 1",
+            [lead.company_name, lead.website ?? null]
+          );
+          if (existing.rowCount === 0) {
+            await db.query(
+              `INSERT INTO leads (company_name, contact_name, phone, website, vertical, location, stage, source, score, created_by)
+               VALUES ($1,$2,$3,$4,$5,$6,'Prospecting','scraper',$7,$8)`,
+              [lead.company_name, lead.contact_name, lead.phone, lead.website,
+               lead.vertical, lead.location, lead.score, task.userId]
+            );
+          }
+        }
       }
     }
 

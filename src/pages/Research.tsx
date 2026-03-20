@@ -36,7 +36,14 @@ const ResearchPage = () => {
 
   useEffect(() => {
     loadJobs();
-    const interval = setInterval(loadJobs, 5000);
+    const interval = setInterval(() => {
+      // Only poll if there are active jobs
+      setJobs((current) => {
+        const hasActive = current.some((j) => j.status === "queued" || j.status === "running");
+        if (hasActive) loadJobs();
+        return current;
+      });
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
