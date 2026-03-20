@@ -24,6 +24,7 @@ import Manager from "./pages/Manager";
 import Owner from "./pages/Owner";
 import Settings from "./pages/Settings";
 import Onboarding from "./pages/Onboarding";
+import Intelligence from "./pages/Intelligence";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
           <Route path="/manager" element={<AuthGuard><Manager /></AuthGuard>} />
           <Route path="/owner" element={<AuthGuard><Owner /></AuthGuard>} />
           <Route path="/settings" element={<AuthGuard><Settings /></AuthGuard>} />
+          <Route path="/intelligence" element={<AuthGuard><Intelligence /></AuthGuard>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -458,7 +458,12 @@ const AdminPage = () => {
 
       {tab === "intelligence" && (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">Industry Knowledge Base and AI distillation management.</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">Industry Knowledge Base and AI distillation management.</p>
+            <Button variant="gold" size="sm" onClick={() => window.location.href = "/intelligence"}>
+              <Cpu className="h-4 w-4 mr-2" /> Go to Intelligence Lab
+            </Button>
+          </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-gradient-card border border-border rounded-xl p-5">

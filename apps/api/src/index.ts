@@ -16,6 +16,7 @@ import { profileRouter } from "./routes/profile.js";
 import { managerRouter } from "./routes/manager.js";
 import { ownerRouter } from "./routes/owner.js";
 import { adminRouter } from "./routes/admin.js";
+import { intelligenceRouter } from "./routes/intelligence.js";
 
 const app = express();
 const PORT = process.env.API_PORT || 4000;
@@ -58,6 +59,7 @@ app.use("/api/profile", profileRouter);
 app.use("/api/manager", managerRouter);
 app.use("/api/owner", ownerRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/intelligence", intelligenceRouter);
 
 // Global error handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

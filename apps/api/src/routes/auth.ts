@@ -72,9 +72,9 @@ authRouter.post("/register", async (req, res) => {
 
     // Create in users table with role = sales_staff
     const result = await db.query(
-      `INSERT INTO users (supabase_uid, email, full_name, role, metadata)
-       VALUES ($1, $2, $3, $4, $5) RETURNING id, email, role`,
-      [data.user.id, email, full_name || email.split("@")[0], "sales_staff", JSON.stringify({ onboarding_complete: false })]
+      `INSERT INTO users (supabase_uid, email, full_name, role, onboarding_complete, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, role`,
+      [data.user.id, email, full_name || email.split("@")[0], "sales_staff", false, JSON.stringify({ onboarding_complete: false })]
     );
 
     const user = result.rows[0] as { id: string; email: string; role: string };
