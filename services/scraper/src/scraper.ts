@@ -143,24 +143,31 @@ async function scrapeWithSteel(url: string): Promise<ScrapeResult> {
 }
 
 export async function runScrapeTask(task: ScrapeTask): Promise<ScrapeResult> {
-  const url = task.url || (task.company_name ? `https://www.${task.company_name.toLowerCase().replace(/\s+/g, "")}.com` : null);
+  const sanitizedName = task.company_name
+    ? task.company_name.toLowerCase().replace(/[^a-z0-9]/g, "")
+    : null;
+  const url = task.url || (sanitizedName ? `https://www.${sanitizedName}.com` : null);
 
-  if (!url && !task.query) {
+  if (!url) {
+    if (task.query) {
+      // Query-only mode: return a placeholder result; actual search logic can be added later
+      return { metadata: { source: "query_placeholder", query: task.query, scraped_at: new Date().toISOString() } };
+    }
     throw new Error("Either url, company_name, or query is required");
   }
 
   if (task.mode === "steel") {
-    return scrapeWithSteel(url!);
+    return scrapeWithSteel(url);
   }
 
   if (task.mode === "firecrawl" || process.env.FIRECRAWL_API_KEY) {
     try {
-      return await scrapeWithFirecrawl(url!);
+      return await scrapeWithFirecrawl(url);
     } catch (err) {
       console.warn("[Scraper] Firecrawl failed, falling back to Steel:", (err as Error).message);
-      return scrapeWithSteel(url!);
+      return scrapeWithSteel(url);
     }
   }
 
-  return scrapeWithSteel(url!);
+  return scrapeWithSteel(url);
 }

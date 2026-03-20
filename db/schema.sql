@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
   full_name     TEXT,
   role          TEXT NOT NULL DEFAULT 'employee'
                   CHECK (role IN ('employee','sales_staff','manager','owner','admin')),
-  location_id   UUID,
   is_active     BOOLEAN DEFAULT TRUE,
   avatar_url    TEXT,
   metadata      JSONB DEFAULT '{}',
@@ -37,6 +36,7 @@ CREATE TABLE IF NOT EXISTS locations (
   updated_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Add location_id FK after locations table exists
 ALTER TABLE users ADD COLUMN IF NOT EXISTS location_id UUID REFERENCES locations(id);
 
 -- =========================================

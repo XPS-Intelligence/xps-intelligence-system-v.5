@@ -61,8 +61,6 @@ const LeadsPage = () => {
     l.vertical?.toLowerCase().includes(search.toLowerCase())
   );
 
-const LeadsPage = () => {
-  // State and data loading are defined above (hoisted)
   return (
   <AppLayout title="Leads">
     <div className="space-y-6">

@@ -13,7 +13,10 @@ const ScrapeSchema = z.object({
   company_name: z.string().optional(),
   query: z.string().optional(),
   mode: z.enum(["firecrawl", "steel", "auto"]).default("auto"),
-});
+}).refine(
+  (d) => !!(d.url || d.company_name || d.query),
+  { message: "At least one of url, company_name, or query is required" }
+);
 
 scrapeRouter.post("/start", requireRole("sales_staff", "manager", "owner", "admin"), async (req, res) => {
   try {
