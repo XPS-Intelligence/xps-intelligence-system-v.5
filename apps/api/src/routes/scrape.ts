@@ -150,6 +150,50 @@ const seedData: Record<string, Record<string, SeedCompany[]>> = {
   },
 };
 
+const CrawlSchema = z.object({
+  city: z.string(),
+  state: z.string().default("FL"),
+  industry: z.string(),
+  specialty: z.string().optional(),
+  keywords: z.string().optional(),
+  enterprise: z.boolean().optional(),
+});
+
+scrapeRouter.post("/crawl", requireRole("sales_staff", "manager", "owner", "admin"), async (req, res) => {
+  try {
+    const { city, state, industry, specialty, keywords, enterprise } = CrawlSchema.parse(req.body);
+    const db = getDb();
+    const user = req.user!;
+    const taskId = randomUUID();
+    const targetCount = enterprise ? 100 : 50;
+
+    await db.query(
+      `INSERT INTO agent_tasks (id, type, status, created_by, payload) VALUES ($1,$2,$3,$4,$5)`,
+      [taskId, "crawl", "queued", user.id, JSON.stringify({ city, state, industry, specialty, keywords, enterprise })]
+    ).catch(() => {});
+
+    res.status(202).json({ status: "queued", taskId, targetCount });
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: "Validation failed", details: err.errors });
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+scrapeRouter.get("/crawl/results/:taskId", async (req, res) => {
+  try {
+    const db = getDb();
+    const task = await db.query("SELECT * FROM agent_tasks WHERE id = $1", [req.params.taskId])
+      .catch(() => ({ rows: [] as Array<{ payload?: Record<string, unknown> }> }));
+    const payload = (task as { rows: Array<{ payload?: Record<string, unknown> }> }).rows[0]?.payload || {};
+
+    await db.query("UPDATE agent_tasks SET status = 'completed', completed_at = NOW() WHERE id = $1", [req.params.taskId]).catch(() => {});
+
+    res.json({ status: "completed", taskId: req.params.taskId, payload });
+  } catch (err) {
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 scrapeRouter.post("/seed-list", requireRole("sales_staff", "manager", "owner", "admin"), async (req, res) => {
   try {
     const { city, categories } = SeedListSchema.parse(req.body);

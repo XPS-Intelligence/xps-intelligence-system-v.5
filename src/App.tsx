@@ -12,6 +12,7 @@ import Leads from "./pages/Leads";
 import AIAssistant from "./pages/AIAssistant";
 import CRM from "./pages/CRM";
 import Research from "./pages/Research";
+import Scraper from "./pages/Scraper";
 import Outreach from "./pages/Outreach";
 import Proposals from "./pages/Proposals";
 import Analytics from "./pages/Analytics";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/ai-assistant" element={<AuthGuard><AIAssistant /></AuthGuard>} />
           <Route path="/crm" element={<AuthGuard><CRM /></AuthGuard>} />
           <Route path="/research" element={<AuthGuard><Research /></AuthGuard>} />
+          <Route path="/scraper" element={<AuthGuard><Scraper /></AuthGuard>} />
           <Route path="/outreach" element={<AuthGuard><Outreach /></AuthGuard>} />
           <Route path="/proposals" element={<AuthGuard><Proposals /></AuthGuard>} />
           <Route path="/analytics" element={<AuthGuard><Analytics /></AuthGuard>} />
