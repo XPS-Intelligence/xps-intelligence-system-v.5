@@ -1,7 +1,7 @@
 import {
   Home, Users, UserSearch, FlaskConical, Mail, FileText,
   BarChart3, BookOpen, Eye, Plug, Settings, Shield, Brain,
-  Building2, Search, Crown, Cpu
+  Building2, Search, Crown, Cpu, Briefcase
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -13,6 +13,7 @@ import {
 
 const mainNav = [
   { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Sales Staff", url: "/sales-staff", icon: Briefcase },
   { title: "CRM", url: "/crm", icon: Users },
   { title: "Leads", url: "/leads", icon: UserSearch },
   { title: "AI Assistant", url: "/ai-assistant", icon: Brain },

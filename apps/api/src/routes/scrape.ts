@@ -82,6 +82,85 @@ scrapeRouter.get("/jobs", async (req, res) => {
   }
 });
 
+// POST /scrape/search — synchronous lead search (DB-first, seed fallback for non-prod)
+const SearchSchema = z.object({
+  city: z.string().min(1),
+  state: z.string().default("FL"),
+  industry: z.string().min(1),
+  keyword: z.string().optional(),
+  max_results: z.number().int().min(1).max(100).default(30),
+});
+
+scrapeRouter.post("/search", requireRole("sales_staff", "manager", "owner", "admin"), async (req, res) => {
+  try {
+    const { city, state, industry, keyword, max_results } = SearchSchema.parse(req.body);
+
+    let dbRows: Record<string, unknown>[] = [];
+    try {
+      const db = getDb();
+      const location = `${city}, ${state}`;
+      const result = await db.query(
+        `SELECT id, company_name as business_name, location as address, phone, website,
+                contact_name as owner_name, email, vertical as industry,
+                COALESCE(score, 50) as score, created_at as scraped_date,
+                '' as city, '' as state, '' as est_employees,
+                '' as est_annual_revenue, '' as years_in_business,
+                0 as google_rating, notes
+         FROM leads
+         WHERE deleted_at IS NULL
+           AND (LOWER(location) LIKE $1 OR LOWER(vertical) LIKE $2 OR LOWER(company_name) LIKE $3)
+         ORDER BY score DESC NULLS LAST, created_at DESC
+         LIMIT $4`,
+        [
+          `%${location.toLowerCase()}%`,
+          `%${industry.toLowerCase()}%`,
+          keyword ? `%${keyword.toLowerCase()}%` : "%%",
+          max_results,
+        ]
+      );
+      dbRows = result.rows as Record<string, unknown>[];
+    } catch {
+      // DB not available — return seed data in non-production environments
+    }
+
+    if (dbRows.length > 0) {
+      return res.json({ results: dbRows, source: "database", count: dbRows.length });
+    }
+
+    // Seed fallback (development/CI only — swap for live scraping in production)
+    const cityKey = Object.keys(seedData).find((k) =>
+      k.toLowerCase().includes(city.toLowerCase())
+    );
+    const industryKey = industry.toLowerCase().replace(/\s+/g, " ");
+    const industryData = cityKey ? (seedData[cityKey][industryKey] || Object.values(seedData[cityKey]).flat()) : [];
+
+    const results = industryData.slice(0, max_results).map((c, i) => ({
+      id: randomUUID(),
+      business_name: c.company_name,
+      address: c.location,
+      phone: "",
+      website: c.website || "",
+      owner_name: "",
+      email: "",
+      industry: c.vertical,
+      score: c.score,
+      scraped_date: new Date().toISOString(),
+      city,
+      state,
+      est_employees: "",
+      est_annual_revenue: "",
+      years_in_business: "",
+      google_rating: 0,
+      notes: "",
+    }));
+
+    res.json({ results, source: "seed", count: results.length });
+  } catch (err) {
+    if (err instanceof z.ZodError) return res.status(400).json({ error: "Validation failed", details: err.errors });
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
 const SeedListSchema = z.object({
   city: z.string(),
   categories: z.array(z.string()),
