@@ -193,25 +193,17 @@ connectorsRouter.post("/:name/test", requireRole("manager", "owner", "admin"), a
   }
 });
 
-connectorsRouter.post("/:name/configure", requireRole("owner", "admin"), async (req, res) => {
+// NOTE: Credential configuration requires secure server-side secret storage (e.g., Railway env vars).
+// This endpoint intentionally does not accept or store credentials to prevent accidental exposure.
+connectorsRouter.post("/:name/configure", requireRole("owner", "admin"), (req, res) => {
   const { name } = req.params;
-  const { credentials } = req.body as { credentials?: Record<string, string> };
-
-  if (!credentials) {
-    return res.status(400).json({ error: "credentials object required" });
-  }
-
-  // In production, these would be stored securely (e.g., Railway env vars, Vault)
-  // For now, return a structured acknowledgment
   const knownConnectors = ["railway", "supabase", "github", "google", "hubspot", "firecrawl", "twilio", "groq"];
   if (!knownConnectors.includes(name)) {
     return res.status(404).json({ error: `Unknown connector: ${name}` });
   }
-
   res.json({
     connector: name,
-    configured: true,
-    message: `Connector '${name}' configuration received. Apply environment variables to activate.`,
-    fields: Object.keys(credentials),
+    message: `To configure '${name}', set the required environment variable on your Railway service and redeploy.`,
+    docs: "https://docs.railway.app/reference/variables",
   });
 });

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { Pool } from "pg";
 import { getDb } from "../lib/db.js";
 import { getRedis } from "../lib/redis.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -118,8 +119,6 @@ healthRouter.post("/heal", requireAuth, async (_req, res) => {
   } catch (err) {
     // Try to reset pool by creating a new connection
     try {
-      const pg = await import("pg");
-      const Pool = pg.default?.Pool ?? (pg as unknown as { Pool: typeof import("pg").Pool }).Pool;
       const newPool = new Pool({ connectionString: process.env.DATABASE_URL });
       await newPool.query("SELECT 1");
       await newPool.end();

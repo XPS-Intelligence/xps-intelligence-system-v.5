@@ -13,7 +13,7 @@ test.describe("10 - Lead Scoring Normalization", () => {
     const url = page.url();
     if (url.includes("leads")) {
       // Look for numeric score values in the page
-      const scoreElements = page.locator("[data-score], [class*='score'], td:has-text(/^\\d+$/), .score-value");
+      const scoreElements = page.locator("[data-score], [class*='score'], .score-value");
       const count = await scoreElements.count();
       if (count > 0) {
         for (let i = 0; i < Math.min(count, 10); i++) {

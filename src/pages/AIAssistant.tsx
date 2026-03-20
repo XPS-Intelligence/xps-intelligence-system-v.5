@@ -104,7 +104,7 @@ const AIAssistant = () => {
               <Input
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder="Ask your AI assistant anything..."
                 className="bg-card border-border"
                 disabled={isLoading}

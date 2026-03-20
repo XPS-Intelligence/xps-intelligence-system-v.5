@@ -9,6 +9,7 @@ export interface LeadScore {
 }
 
 export function normalizeScore(raw: number, min = 0, max = 100): number {
+  if (min === max) return 0; // guard against division by zero
   return Math.max(0, Math.min(100, Math.round(((raw - min) / (max - min)) * 100)));
 }
 

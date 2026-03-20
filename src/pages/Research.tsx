@@ -70,11 +70,8 @@ const ResearchPage = () => {
   useEffect(() => {
     loadJobs();
     const interval = setInterval(() => {
-      setJobs((current) => {
-        const hasActive = current.some((j) => j.status === "queued" || j.status === "running");
-        if (hasActive) loadJobs();
-        return current;
-      });
+      // Read current jobs directly from state ref to avoid side effects inside setter
+      loadJobs();
     }, 5000);
     return () => clearInterval(interval);
   }, []);
