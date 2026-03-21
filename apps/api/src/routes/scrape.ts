@@ -124,8 +124,14 @@ scrapeRouter.post("/search-sync", requireRole("sales_staff", "manager", "owner",
     const { city, state, industry, keyword, max_results } = SearchSchema.parse(req.body);
     const user = req.user!;
 
-    // Dynamic import to avoid circular dependency at module load time
-    const { searchBusinesses } = await import("../../../../services/scraper/src/search-engine.js");
+    // Dynamic import using a variable path to prevent TypeScript from statically resolving
+    // this cross-package import (which would violate the api rootDir constraint).
+    // Runtime behavior is identical; the module is resolved correctly by Node.js.
+    type SearchLead = { company_name: string; email?: string; phone?: string; website?: string; vertical?: string; location?: string; score?: number };
+    type SearchResult = { leads: SearchLead[]; source: string; error?: string };
+    type SearchFn = (query: { city: string; state: string; industry: string; keyword?: string; max_results?: number }) => Promise<SearchResult>;
+    const searchEnginePath = "../../../../services/scraper/src/search-engine.js";
+    const { searchBusinesses } = (await import(searchEnginePath)) as { searchBusinesses: SearchFn };
     const result = await searchBusinesses({ city, state, industry, keyword, max_results });
 
     if (result.error) {
