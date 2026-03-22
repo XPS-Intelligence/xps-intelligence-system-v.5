@@ -11,7 +11,7 @@ export const LandingNav = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         <Link to="/" className="flex items-center gap-3">
-          <img src={xpsLogo} alt="XPS Intelligence" className="h-10 w-10" />
+          <img alt="XPS Intelligence" className="h-10 w-10" src="/lovable-uploads/b438d249-21ec-46ab-a55c-d807ce4debe8.png" />
           <div className="flex flex-col">
             <span className="text-sm font-bold tracking-wider text-foreground">XPS INTELLIGENCE</span>
             <span className="text-[10px] text-muted-foreground tracking-widest uppercase">Xtreme Polishing Systems</span>
@@ -19,11 +19,11 @@ export const LandingNav = () => {
         </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          {["Platform", "Solutions", "Coverage", "About"].map((item) => (
-            <a key={item} href={`#${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          {["Platform", "Solutions", "Coverage", "About"].map((item) =>
+          <a key={item} href={`#${item.toLowerCase()}`} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               {item}
             </a>
-          ))}
+          )}
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -40,13 +40,13 @@ export const LandingNav = () => {
         </button>
       </div>
 
-      {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background p-4 space-y-3">
-          {["Platform", "Solutions", "Coverage", "About"].map((item) => (
-            <a key={item} href={`#${item.toLowerCase()}`} className="block text-sm text-muted-foreground py-2">
+      {mobileOpen &&
+      <div className="md:hidden border-t border-border bg-background p-4 space-y-3">
+          {["Platform", "Solutions", "Coverage", "About"].map((item) =>
+        <a key={item} href={`#${item.toLowerCase()}`} className="block text-sm text-muted-foreground py-2">
               {item}
             </a>
-          ))}
+        )}
           <div className="flex gap-2 pt-2">
             <Button variant="outline" size="sm" className="flex-1" asChild>
               <Link to="/login">Sign In</Link>
@@ -56,7 +56,7 @@ export const LandingNav = () => {
             </Button>
           </div>
         </div>
-      )}
-    </nav>
-  );
+      }
+    </nav>);
+
 };
