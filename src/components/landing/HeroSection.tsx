@@ -30,7 +30,7 @@ export const HeroSection = () =>
       transition={{ duration: 0.7, delay: 0.1 }}
       className="text-4xl md:text-6xl lg:text-7xl font-black leading-[1.05] mb-6 max-w-5xl mx-auto">
       
-        <span className="text-foreground">​XPS</span>{" "}
+        <span className="text-foreground">​XPS INTELLIGENCE </span>{" "}
         <span className="text-gradient-gold">
 </span>
       </motion.h1>
