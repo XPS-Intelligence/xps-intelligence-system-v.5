@@ -13,7 +13,7 @@ export const LandingNav = () => {
         <Link to="/" className="flex items-center gap-3">
           <img alt="XPS Intelligence" className="h-10 w-10" src="/lovable-uploads/b438d249-21ec-46ab-a55c-d807ce4debe8.png" />
           <div className="flex flex-col">
-            <span className="text-sm font-bold tracking-wider text-foreground">XPS INTELLIGENCE</span>
+            <span className="text-sm font-bold tracking-wider text-foreground">XPS XPRESS  </span>
             <span className="text-[10px] text-muted-foreground tracking-widest uppercase">Xtreme Polishing Systems</span>
           </div>
         </Link>
