@@ -9,7 +9,7 @@ export const LandingNav = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+      <div className="container mx-auto flex items-center justify-between h-16 px-4 bg-black/0 border border-solid shadow-sm opacity-100">
         <Link to="/" className="flex items-center gap-3">
           <img alt="XPS Intelligence" className="h-10 w-10" src="/lovable-uploads/b438d249-21ec-46ab-a55c-d807ce4debe8.png" />
           <div className="flex flex-col">
